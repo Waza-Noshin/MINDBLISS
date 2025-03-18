@@ -122,7 +122,7 @@ class HomeScreen(Screen):
 
     def go_to_emotion_trends(self, instance):
         """ Navigate to Emotion Trends Screen """
-        self.app.root.current = 'emotion_trends'
+        self.app.root.current = 'emotion_trend'
 
     def go_to_user_profile(self, instance):
         """ Navigate to User Profile Screen """

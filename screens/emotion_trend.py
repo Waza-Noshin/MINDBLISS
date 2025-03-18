@@ -4,6 +4,10 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.graphics import Color, Rectangle
 from kivy.uix.image import Image
+import matplotlib
+matplotlib.use('module://kivy.garden.matplotlib.backend_kivyagg')  # Ensure correct backend
+import matplotlib.pyplot as plt
+from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 from kivy.uix.popup import Popup
 from kivy.uix.widget import Widget
 from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
@@ -65,9 +69,10 @@ class EmotionTrendScreen(Screen):
         )
         self.layout.add_widget(self.quote_label)
 
-        # Graph Placeholder
-        self.graph_widget = Widget(size_hint=(1, 0.7))
+        # Graph Container
+        self.graph_widget = BoxLayout(size_hint=(1, 0.7))
         self.layout.add_widget(self.graph_widget)
+
 
         # Back to Home Button
         self.back_to_home_button = Button(
@@ -102,38 +107,47 @@ class EmotionTrendScreen(Screen):
             self.show_notification()
 
     def draw_graph(self):
-        """ Draw the emotion trend graph using Matplotlib """
+        """ Draw the emotion trend graph using Matplotlib and ensure rendering """
         emotions = ["Neutral", "Stress Detected", "Anxiety Detected", "Depression Detected"]
         counts = [self.emotion_data[emotion] for emotion in emotions]
 
-        # Create a bar graph
-        plt.figure(figsize=(6, 4))
-        plt.bar(emotions, counts, color=['green', 'orange', 'yellow', 'red'])
-        plt.title('Emotion Trend Analysis')
-        plt.xlabel('Emotions')
-        plt.ylabel('Frequency')
-        plt.xticks(rotation=45)
+        # Clear any previous figure
+        plt.close('all')
 
-        # Clear previous graph widget
+        # Create a new figure
+        fig, ax = plt.subplots(figsize=(6, 4))
+        ax.bar(emotions, counts, color=['green', 'orange', 'yellow', 'red'])
+        ax.set_title('Emotion Trend Analysis')
+        ax.set_xlabel('Emotions')
+        ax.set_ylabel('Frequency')
+        ax.set_xticklabels(emotions, rotation=45)
+
+        # Clear previous widgets in graph container
         self.graph_widget.clear_widgets()
 
-        # Embed the graph into the Kivy app
-        graph_canvas = FigureCanvasKivyAgg(plt.gcf())
+        # Add Matplotlib graph to the Kivy layout
+        graph_canvas = FigureCanvasKivyAgg(fig)
         self.graph_widget.add_widget(graph_canvas)
+
+        print("Graph updated successfully!")  # Debugging statement
+
 
     def show_notification(self):
         """ Show a notification if negative emotions are detected more than 4 times """
-        notification_popup = Popup(
-            title='Professional Help Recommended',
-            size_hint=(0.8, 0.4),
-            content=Label(
-                text="We have noticed you are experiencing negative emotions frequently.\n"
-                     "Kindly consider seeking professional help.",
-                font_size=18,
-                halign='center'
-            )
-        )
-        notification_popup.open()
+        content = BoxLayout(orientation='vertical', spacing=10, padding=[10, 10])
+        content.add_widget(Label(
+            text="We have noticed you are experiencing negative emotions frequently.\n"
+                 "Kindly consider seeking professional help.",
+            font_size=16,
+            halign='center'
+        ))
+
+        close_button = Button(text="OK", size_hint=(1, None), height=40)
+        popup = Popup(title="Professional Help Recommended", content=content, size_hint=(0.8, 0.4))
+        close_button.bind(on_press=popup.dismiss)
+        content.add_widget(close_button)
+
+        popup.open()
 
     def go_home(self, instance):
         """ Navigate back to HomeScreen """
