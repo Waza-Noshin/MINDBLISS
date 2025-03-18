@@ -1,0 +1,4 @@
+{
+    "java.project.sourcePaths": ["src"],
+    "java.project.referencedLibraries": ["libs/accessory-2.6.5.jar"]
+}

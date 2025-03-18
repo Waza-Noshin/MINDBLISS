@@ -1,0 +1,11 @@
+# Ignore Python virtual environment
+mindbliss_env/
+archive (7)
+wearable
+# Ignore other files/folders
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
